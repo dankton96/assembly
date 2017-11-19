@@ -1,0 +1,448 @@
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;************** AULA 01 - PROGRAMA PARA PISCAR LED *****************
+                      00002 ;Aluno:Danton Coelho Valadares                  Matricula:526983
+Warning[205]: Found directive in column 1. (LIST)
+                      00003 LIST   P=PIC16F628A
+                      00004 ;RADIX DEC      
+                      00005 #INCLUDE <P16F628A.INC>
+                      00001         LIST
+                      00002 ; P16F628A.INC  Standard Header File, Version 1.10    Microchip Technology, Inc.
+                      00265         LIST
+                      00266 
+2007   3F10           00006         __CONFIG _INTRC_OSC_NOCLKOUT & _WDT_OFF & _PWRTE_ON & _BODEN_OFF & _LVP_OFF & _CP_OFF & _MCLRE_O
+                            FF & _DATA_CP_OFF 
+                      00007         ;ou __CONFIG H'3F10'
+                      00008 
+                      00009         CBLOCK          0x20                                            ;ENDEREÇO INICIAL DA MEMÓRIA DE 
+                            USUÁRIO
+  00000020            00010         CONTADOR1
+  00000021            00011         CONTADOR2
+  00000022            00012         CONTADOR3
+  00000023            00013         CONTADOR4
+  00000024            00014         CONTADOR5
+                      00015         ENDC                                                            ;FIM DO BLOCO DE MEMÓRIA        
+                                    
+                      00016         ORG     0x00                                                    ;ENDEREÇO INICIAL DE PROCESSAMEN
+                            TO
+                      00017 ;1=INPUT 0=OUTPUT
+                      00018 ;########################################
+0000   0185           00019         CLRF    PORTA                                           ;Limpa o portA
+0001   0186           00020         CLRF    PORTB
+0002   3007           00021         MOVLW   0x07                                            ;7 desabilita os comparadores (ver datas
+                            heet)
+0003   009F           00022         MOVWF   CMCON                                           ;Escreve o Valor 7 no reg. CMCON
+0004   1303           00023         BCF        STATUS, RP1
+0005   1683           00024         BSF        STATUS, RP0
+                      00025 ;########################################
+0006   30E0           00026         MOVLW   B'11100000'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0007   0086           00027         MOVWF   TRISB
+                      00028 ;########################################
+0008   30FD           00029         MOVLW   B'11111101'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0009   0085           00030         MOVWF   TRISA
+                      00031 ;########################################
+                      00032         #DEFINE BOTAO           PORTA,2         ;BOTAO QUE SOLICITA TRAVESSIA DE PEDESTRE
+                      00033         #DEFINE S1RED           PORTB,0         ;LUZ VERMELHA DO SINAL1
+                      00034         #DEFINE         S1YELLOW        PORTB,1         ;LUZ AMARELA DO SINAL1
+                      00035         #DEFINE         S1GREEN         PORTB,2         ;LUZ VERDE DO SINAL1
+                      00036         #DEFINE S2RED           PORTB,3         ;LUZ VERMELHA DO SINAL2
+                      00037         #DEFINE         S2YELLOW        PORTB,4         ;LUZ AMARELA DO SINAL2
+                      00038         #DEFINE         S2GREEN                 PORTB,5         ;LUZ VERDE DO SINAL2
+                      00039 ;########################################
+000A   2???           00040         GOTO    INICIO
+                      00041 ;########################################
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+000B                  00042 AJUSTE
+000B   0000           00043         NOP
+000C   0000           00044         NOP
+000D   0000           00045         NOP
+000E   0000           00046         NOP
+000F   0000           00047         NOP
+0010   0000           00048         NOP
+0011   0000           00049         NOP
+0012   0000           00050         NOP
+0013   0000           00051         NOP
+0014   0000           00052         NOP
+0015   0000           00053         NOP
+0016   0000           00054         NOP
+Warning[203]: Found opcode in column 1. (RETURN)
+0017   0008           00055 RETURN
+                      00056 ;##########################################################
+0018                  00057 ATRASO
+0018   2???           00058         CALL ATRASO1
+0019   2???           00059         CALL ATRASO4
+001A   2???           00060         CALL ATRASO4
+001B   2???           00061         CALL ATRASO4
+001C   2???           00062         CALL ATRASO4
+001D   2???           00063         CALL ATRASO4
+001E   2???           00064         CALL ATRASO4
+001F   2???           00065         CALL AJUSTE
+0020   2???           00066         CALL AJUSTE
+0021   0000           00067         NOP
+0022   0000           00068         NOP
+0023   0000           00069         NOP
+0024   0000           00070         NOP
+0025   0000           00071         NOP
+0026   0000           00072         NOP
+0027   0000           00073         NOP
+Warning[203]: Found opcode in column 1. (RETURN)
+0028   0008           00074 RETURN  
+                      00075 ;##########################################################
+0029                  00076 ATRASO1 
+0029   3010           00077         MOVLW   10
+002A   00A1           00078         MOVWF   CONTADOR2
+002B   2???           00079         CALL    ATRASO2
+Message[305]: Using default destination of 1 (file).
+002C   0BA0           00080         DECFSZ  CONTADOR1       
+002D   2???           00081         GOTO    ATRASO1
+Warning[203]: Found opcode in column 1. (RETURN)
+002E   0008           00082 RETURN
+                      00083 ;##########################################################                     
+002F                  00084 ATRASO2
+002F   3010           00085         MOVLW   10
+0030   00A2           00086         MOVWF   CONTADOR3
+0031   2???           00087         CALL    ATRASO3
+Message[305]: Using default destination of 1 (file).
+0032   0BA1           00088         DECFSZ  CONTADOR2       
+0033   2???           00089         GOTO    ATRASO2
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+Warning[203]: Found opcode in column 1. (RETURN)
+0034   0008           00090 RETURN
+                      00091 ;##########################################################
+0035                  00092 ATRASO3
+0035   3010           00093         MOVLW   10
+0036   00A3           00094         MOVWF   CONTADOR4
+0037   2???           00095         CALL    ATRASO4
+Message[305]: Using default destination of 1 (file).
+0038   0BA2           00096         DECFSZ  CONTADOR3       
+0039   2???           00097         GOTO    ATRASO3
+Warning[203]: Found opcode in column 1. (RETURN)
+003A   0008           00098 RETURN
+                      00099 ;##########################################################
+003B                  00100 ATRASO4
+Message[305]: Using default destination of 1 (file).
+003B   0BA3           00101         DECFSZ  CONTADOR4       
+003C   2???           00102         GOTO    ATRASO4
+Warning[203]: Found opcode in column 1. (RETURN)
+003D   0008           00103 RETURN
+                      00104 ;##########################################################
+003E                  00105 S1RED_S2GREEN
+003E   1406           00106                 BSF S1RED
+003F   1086           00107                 BCF S1YELLOW
+0040   1106           00108                 BCF S1GREEN
+0041   1186           00109                 BCF S2RED
+0042   1206           00110                 BCF S2YELLOW
+0043   1686           00111                 BSF S2GREEN
+Warning[203]: Found opcode in column 1. (RETURN)
+0044   0008           00112 RETURN  
+                      00113 ;##########################################################
+0045                  00114 S1RED_S2YELLOW
+0045   1406           00115                 BSF S1RED
+0046   1086           00116                 BCF S1YELLOW
+0047   1106           00117                 BCF S1GREEN
+0048   1186           00118                 BCF S2RED
+0049   1606           00119                 BSF S2YELLOW
+004A   1286           00120                 BCF S2GREEN
+Warning[203]: Found opcode in column 1. (RETURN)
+004B   0008           00121 RETURN
+                      00122 ;##########################################################
+004C                  00123 S1GREEN_S2RED
+004C   1006           00124                 BCF S1RED
+004D   1086           00125                 BCF S1YELLOW
+004E   1506           00126                 BSF S1GREEN
+004F   1586           00127                 BSF S2RED
+0050   1206           00128                 BCF S2YELLOW
+0051   1286           00129                 BCF S2GREEN
+Warning[203]: Found opcode in column 1. (RETURN)
+0052   0008           00130 RETURN
+                      00131 ;##########################################################
+0053                  00132 S1YELLOW_S2RED
+0053   1006           00133                 BCF S1RED
+0054   1486           00134                 BSF S1YELLOW
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0055   1106           00135                 BCF S1GREEN
+0056   1586           00136                 BSF S2RED
+0057   1206           00137                 BCF S2YELLOW
+0058   1286           00138                 BCF S2GREEN
+Warning[203]: Found opcode in column 1. (RETURN)
+0059   0008           00139 RETURN
+                      00140 ;##########################################################
+005A                  00141 CONTROLE_SEMAFORO
+                      00142         ;LOOP:
+                      00143         ;CALL S1RED_S2GREEN
+                      00144         ;       4 SEGUNDOS SEMPRE VERIFICANDO SE O BOTÃO FOI APERTADO
+                      00145         ;       SE O BOTAO FOI APERTADO, CHAMA O CICLO DE TRAVESSIA DE PEDESTRE 1 VEZ E DEPOIS RETORNA A
+                            O INICIO DO LOOP
+                      00146         ;CALL S1RED_S2YELLOW
+                      00147         ;       3 SEGUNDOS SEMPRE VERIFICANDO SE O BOTÃO FOI APERTADO
+                      00148         ;       SE O BOTAO FOI APERTADO, CHAMA O CICLO DE TRAVESSIA DE PEDESTRE 1 VEZ E DEPOIS RETORNA A
+                            O INICIO DO LOOP
+                      00149         ;CALL S1GREEN_S2RED
+                      00150         ;       4 SEGUNDOS SEMPRE VERIFICANDO SE O BOTÃO FOI APERTADO
+                      00151         ;       SE O BOTAO FOI APERTADO, CHAMA O CICLO DE TRAVESSIA DE PEDESTRE 1 VEZ E DEPOIS RETORNA A
+                            O INICIO DO LOOP
+                      00152         ;CALL S1YELLOW_S2RED
+                      00153         ;       3 SEGUNDOS SEMPRE VERIFICANDO SE O BOTÃO FOI APERTADO
+                      00154         ;       SE O BOTAO FOI APERTADO, CHAMA O CICLO DE TRAVESSIA DE PEDESTRE 1 VEZ E DEPOIS RETORNA A
+                            O INICIO DO LOOP
+                      00155         ;GOTO LOOP
+005A                  00156 FIM_CICLO
+Warning[203]: Found opcode in column 1. (RETURN)
+005A   0008           00157 RETURN
+                      00158 ;##########################################################
+005B                  00159 INICIO
+005B   0185           00160         CLRF    PORTA           ;LIMPA O PORTA
+005C   0186           00161         CLRF    PORTB           ;LIMPA O PORTB
+005D   1683           00162         BSF             STATUS, RP0
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+005E   0186           00163         CLRF    TRISB
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+005F   0185           00164         CLRF    TRISA
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0060   0185           00165         CLRF    TRISA
+0061   1283           00166         BCF             STATUS, RP0
+0062                  00167 REPETE
+0062   2???           00168         CALL    CONTROLE_SEMAFORO
+0063   2???           00169         GOTO    REPETE
+Warning[205]: Found directive in column 1. (END)
+3F10                  00170 END
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  5
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ADEN                              00000003
+AJUSTE                            0000000B
+ATRASO                            00000018
+ATRASO1                           00000029
+ATRASO2                           0000002F
+ATRASO3                           00000035
+ATRASO4                           0000003B
+BOTAO                             PORTA,2
+BRGH                              00000002
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCPR1H                            00000016
+CCPR1L                            00000015
+CIS                               00000003
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000001F
+CMIE                              00000006
+CMIF                              00000006
+CONTADOR1                         00000020
+CONTADOR2                         00000021
+CONTADOR3                         00000022
+CONTADOR4                         00000023
+CONTADOR5                         00000024
+CONTROLE_SEMAFORO                 0000005A
+CREN                              00000004
+CSRC                              00000007
+DC                                00000001
+EEADR                             0000009B
+EECON1                            0000009C
+EECON2                            0000009D
+EEDATA                            0000009A
+EEIE                              00000007
+EEIF                              00000007
+F                                 00000001
+FERR                              00000002
+FIM_CICLO                         0000005A
+FSR                               00000004
+GIE                               00000007
+INDF                              00000000
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  6
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+INICIO                            0000005B
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+NOT_BO                            00000000
+NOT_BOD                           00000000
+NOT_BOR                           00000000
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+OERR                              00000001
+OPTION_REG                        00000081
+OSCF                              00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PIE1                              0000008C
+PIR1                              0000000C
+PORTA                             00000005
+PORTB                             00000006
+PR2                               00000092
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+RBIE                              00000003
+RBIF                              00000000
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+REPETE                            00000062
+RP0                               00000005
+RP1                               00000006
+RX9                               00000006
+RX9D                              00000000
+S1GREEN                           PORTB,2
+S1GREEN_S2RED                     0000004C
+S1RED                             PORTB,0
+S1RED_S2GREEN                     0000003E
+S1RED_S2YELLOW                    00000045
+S1YELLOW                          PORTB,1
+S1YELLOW_S2RED                    00000053
+S2GREEN                           PORTB,5
+S2RED                             PORTB,3
+S2YELLOW                          PORTB,4
+SPBRG                             00000099
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+SPEN                              00000007
+SREN                              00000005
+STATUS                            00000003
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1OSCEN                           00000003
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISB                             00000086
+TRMT                              00000001
+TX9                               00000006
+TX9D                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             0000009F
+VREN                              00000007
+VROE                              00000006
+VRR                               00000005
+W                                 00000000
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CP_OFF                           00003FFF
+_CP_ON                            00001FFF
+_DATA_CP_OFF                      00003FFF
+_DATA_CP_ON                       00003EFF
+_ER_OSC_CLKOUT                    00003FFF
+_ER_OSC_NOCLKOUT                  00003FFE
+_EXTCLK_OSC                       00003FEF
+_HS_OSC                           00003FEE
+_INTOSC_OSC_CLKOUT                00003FFD
+_INTOSC_OSC_NOCLKOUT              00003FFC
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FEC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC_CLKOUT                    00003FFF
+_RC_OSC_NOCLKOUT                  00003FFE
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FED
+__16F628A                         00000001
+__DEBUG                           1
+
+Errors   :     0
+Warnings :    13 reported,     0 suppressed
+Messages :     9 reported,     0 suppressed
+
+
