@@ -1,14 +1,14 @@
-MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  1
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-20-2017  16:54:31         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00001 ;************** AULA 01 - PROGRAMA PARA PISCAR LED *****************
-                      00002 ;Aluno:Danton Coelho Valadares                  Matricula:526983
+                      00001 ;**************  - PROGRAMA SEMÁFORO *****************
+                      00002 ;Aluno Jãozinho:                        Matricula: 123454321
+                      00003 ;#############################################################################
 Warning[205]: Found directive in column 1. (LIST)
-                      00003 LIST   P=PIC16F628A
-                      00004 ;RADIX DEC      
+                      00004 LIST   P=PIC16F628A
                       00005 #INCLUDE <P16F628A.INC>
                       00001         LIST
                       00002 ; P16F628A.INC  Standard Header File, Version 1.10    Microchip Technology, Inc.
@@ -18,229 +18,292 @@ Warning[205]: Found directive in column 1. (LIST)
                             FF & _DATA_CP_OFF 
                       00007         ;ou __CONFIG H'3F10'
                       00008 
-                      00009         CBLOCK          0x20                                            ;ENDEREÇO INICIAL DA MEMÓRIA DE 
-                            USUÁRIO
-  00000020            00010         CONTADOR1
-  00000021            00011         CONTADOR2
-  00000022            00012         CONTADOR3
-  00000023            00013         CONTADOR4
-  00000024            00014         CONTADOR5
-                      00015         ENDC                                                            ;FIM DO BLOCO DE MEMÓRIA        
-                                    
-                      00016         ORG     0x00                                                    ;ENDEREÇO INICIAL DE PROCESSAMEN
-                            TO
-                      00017 ;1=INPUT 0=OUTPUT
-                      00018 ;########################################
-0000   0185           00019         CLRF    PORTA                                           ;Limpa o portA
-0001   0186           00020         CLRF    PORTB
-0002   3007           00021         MOVLW   0x07                                            ;7 desabilita os comparadores (ver datas
-                            heet)
-0003   009F           00022         MOVWF   CMCON                                           ;Escreve o Valor 7 no reg. CMCON
-0004   1303           00023         BCF        STATUS, RP1
-0005   1683           00024         BSF        STATUS, RP0
-                      00025 ;########################################
-0006   30E0           00026         MOVLW   B'11100000'
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0007   0086           00027         MOVWF   TRISB
-                      00028 ;########################################
-0008   30FD           00029         MOVLW   B'11111101'
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0009   0085           00030         MOVWF   TRISA
-                      00031 ;########################################
-                      00032         #DEFINE BOTAO           PORTA,2         ;BOTAO QUE SOLICITA TRAVESSIA DE PEDESTRE
-                      00033         #DEFINE S1RED           PORTB,0         ;LUZ VERMELHA DO SINAL1
-                      00034         #DEFINE         S1YELLOW        PORTB,1         ;LUZ AMARELA DO SINAL1
-                      00035         #DEFINE         S1GREEN         PORTB,2         ;LUZ VERDE DO SINAL1
-                      00036         #DEFINE S2RED           PORTB,3         ;LUZ VERMELHA DO SINAL2
-                      00037         #DEFINE         S2YELLOW        PORTB,4         ;LUZ AMARELA DO SINAL2
-                      00038         #DEFINE         S2GREEN                 PORTB,5         ;LUZ VERDE DO SINAL2
-                      00039 ;########################################
-000A   2???           00040         GOTO    INICIO
-                      00041 ;########################################
-MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  2
+Warning[205]: Found directive in column 1. (CBLOCK)
+                      00009 CBLOCK          0x20                                            ;ENDEREÇO INICIAL DA MEMÓRIA DE USUÁRIO
+                      00010 
+  00000020            00011         CONTADOR1
+  00000021            00012         CONTADOR2
+  00000022            00013         CONTADOR3
+  00000023            00014         CONTADOR4
+  00000024            00015         CONTADOR5
+                      00016   
+  00000025            00017         CONTADOR3_SEG
+  00000026            00018         CONTADOR4_SEG
+  00000027            00019         CONTADOR7_SEG
+                      00020   
+                      00021         ENDC                                                      ;FIM DO BLOCO DE MEMÓRIA              
+                      00022 ;######################################################################################
+                      00023         #DEFINE BANK0   BCF STATUS,RP0    ;SETA BANK 0 DE MEMÓRIA
+                      00024         #DEFINE BANK1   BSF STATUS,RP0    ;SETA BANK 1 DE MEMÓRIA
+                      00025 ;######################################################################################
+                      00026         #DEFINE BOTAO           PORTA,2           ;BOTAO QUE SOLICITA TRAVESSIA DE PEDESTRE
+                      00027         #DEFINE S1RED           PORTB,0           ;LUZ VERMELHA DO SINAL1
+                      00028         #DEFINE S1YELLOW        PORTB,1           ;LUZ AMARELA DO SINAL1
+                      00029         #DEFINE S1GREEN         PORTB,2           ;LUZ VERDE DO SINAL1
+                      00030         #DEFINE S2RED           PORTB,3           ;LUZ VERMELHA DO SINAL2
+                      00031         #DEFINE S2YELLOW        PORTB,4           ;LUZ AMARELA DO SINAL2
+                      00032         #DEFINE S2GREEN         PORTB,5           ;LUZ VERDE DO SINAL2
+                      00033     #DEFINE VERIFICA    PORTA,3           ;VARIAVEL QUE INFORMA A SITUACAO DO SEMAFORO
+                      00034 
+                      00035         ORG     0x00                                              ;ENDEREÇO INICIAL DE PROCESSAMENTO
+                      00036 ;######################################################################################
+0000   0185           00037         CLRF            PORTA                 ;Limpa o portA
+0001   0186           00038         CLRF            PORTB                             ;Limpa o portB
+0002   3007           00039         MOVLW           0x07                  ;7 desabilita os comparadores (ver datasheet)
+0003   009F           00040         MOVWF           CMCON                     ;Escreve o Valor 7 no reg. CMCON
+0004   1303           00041         BCF             STATUS, RP1
+0005   1683           00042         BSF             STATUS, RP0
+                      00043     
+                      00044 ;######################################################################################
+0006   2???           00045         GOTO    INICIO
+                      00046 ;######################################################################################
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-20-2017  16:54:31         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-000B                  00042 AJUSTE
-000B   0000           00043         NOP
-000C   0000           00044         NOP
-000D   0000           00045         NOP
-000E   0000           00046         NOP
-000F   0000           00047         NOP
-0010   0000           00048         NOP
-0011   0000           00049         NOP
-0012   0000           00050         NOP
-0013   0000           00051         NOP
-0014   0000           00052         NOP
-0015   0000           00053         NOP
-0016   0000           00054         NOP
-Warning[203]: Found opcode in column 1. (RETURN)
-0017   0008           00055 RETURN
-                      00056 ;##########################################################
-0018                  00057 ATRASO
-0018   2???           00058         CALL ATRASO1
-0019   2???           00059         CALL ATRASO4
-001A   2???           00060         CALL ATRASO4
-001B   2???           00061         CALL ATRASO4
-001C   2???           00062         CALL ATRASO4
-001D   2???           00063         CALL ATRASO4
-001E   2???           00064         CALL ATRASO4
-001F   2???           00065         CALL AJUSTE
-0020   2???           00066         CALL AJUSTE
-0021   0000           00067         NOP
-0022   0000           00068         NOP
-0023   0000           00069         NOP
-0024   0000           00070         NOP
-0025   0000           00071         NOP
-0026   0000           00072         NOP
-0027   0000           00073         NOP
-Warning[203]: Found opcode in column 1. (RETURN)
-0028   0008           00074 RETURN  
-                      00075 ;##########################################################
-0029                  00076 ATRASO1 
-0029   3010           00077         MOVLW   10
-002A   00A1           00078         MOVWF   CONTADOR2
-002B   2???           00079         CALL    ATRASO2
+                      00047 
+0007                  00048 INICIO
+0007   1683           00049         BANK1                                    ;ALTERA PARA O BANCO 1 
+0008   3004           00050         MOVLW   B'00000100'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0009   0085           00051         MOVWF   TRISA                        ;DEFINE RA2 COMO ENTRADA E DEMAIS COMO SAÍDAS
+000A   3000           00052         MOVLW   B'00000000'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000B   0086           00053         MOVWF   TRISB                        ;DEFINE TODO O PORTB COMO SAÍDA
+000C   3000           00054         MOVLW   B'00000000'
+000D   008B           00055         MOVWF   INTCON                       ;TODAS AS INTERRUPÇÕES DESLIGADAS
+000E   1283           00056         BANK0                                    ;RETORNA PARA O BANCO 0
+000F   3007           00057         MOVLW   B'00000111'
+0010   009F           00058         MOVWF   CMCON                        ;DEFINE O MODO DO COMPARADOR ANALÓGICO
+                      00059     
+0011                  00060 CICLO
+0011   2???           00061         CALL            ESTADOS_MAQUINAS
+0012   2???           00062         GOTO            CICLO
+                      00063 
+                      00064 ;################################################## ATRASO 1 SEGUNDO ###################################
+                            ###############################
+0013                  00065 ATRASO                          
+0013   3031           00066         MOVLW   0x31
+0014   00A0           00067         MOVWF   CONTADOR1               ;CONTADOR1 = 3
+0015   301C           00068     MOVLW       0x1C
+0016   00A1           00069         MOVWF   CONTADOR2               ;CONTADOR2 = 27
+0017   30EB           00070     MOVLW       0xEB
+0018   00A2           00071         MOVWF   CONTADOR3               ;CONTADOR3 = 255
+0019   2???           00072     CALL ATRASO2
+                      00073 ;2d 2E
+001A                  00074 ATRASO1                         
+001A   2???           00075   CALL    ATRASO2                                       ;CHAMA A FUNÇÃO ATRASO2
+001B   0000           00076   NOP
+001C   0000           00077   NOP
+001D   0000           00078   NOP   
+001E   0000           00079   NOP                                 
 Message[305]: Using default destination of 1 (file).
-002C   0BA0           00080         DECFSZ  CONTADOR1       
-002D   2???           00081         GOTO    ATRASO1
-Warning[203]: Found opcode in column 1. (RETURN)
-002E   0008           00082 RETURN
-                      00083 ;##########################################################                     
-002F                  00084 ATRASO2
-002F   3010           00085         MOVLW   10
-0030   00A2           00086         MOVWF   CONTADOR3
-0031   2???           00087         CALL    ATRASO3
+001F   0BA0           00080   DECFSZ CONTADOR1                 ;DECREMENTA O CONTADOR1
+0020   2???           00081   GOTO   ATRASO1                       ;ENQUANTO CONTADOR1 != 0 CHAMA A FUNÇAO ATRASO 1 
+                      00082                                         
+0021   0008           00083   RETURN                               ;SE ATRASO1 == 0 RETORNA 
+0022                  00084 ATRASO2                         
+0022   2???           00085   CALL    ATRASO3                  ;CHAMA A FUNÇÃO ATRASO3
 Message[305]: Using default destination of 1 (file).
-0032   0BA1           00088         DECFSZ  CONTADOR2       
-0033   2???           00089         GOTO    ATRASO2
-MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  3
+0023   0BA1           00086   DECFSZ  CONTADOR2                ;DECREMENTA O CONTADOR2
+0024   2???           00087   GOTO    ATRASO2                  ;ENQUANTO CONTADOR2 != 0 CHAMA A FUNÇAO ATRASO 2
+                      00088     
+0025   2???           00089   CALL BOTAO_PRES
+0026   301C           00090   MOVLW 0x1C
+0027   00A1           00091   MOVWF CONTADOR2
+0028   0008           00092   RETURN                          ;RETORNA
+0029                  00093 ATRASO3 
+Message[305]: Using default destination of 1 (file).
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-20-2017  16:54:31         PAGE  3
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-Warning[203]: Found opcode in column 1. (RETURN)
-0034   0008           00090 RETURN
-                      00091 ;##########################################################
-0035                  00092 ATRASO3
-0035   3010           00093         MOVLW   10
-0036   00A3           00094         MOVWF   CONTADOR4
-0037   2???           00095         CALL    ATRASO4
+0029   0BA2           00094   DECFSZ CONTADOR3        ;DECREMENTA CONTADOR3 
+002A   2???           00095   GOTO   ATRASO3      ;CHAMA A FUNÇÃO ATRASO3
+                      00096   
+002B   30EB           00097   MOVLW 0xEB
+002C   00A2           00098   MOVWF CONTADOR3
+002D   0008           00099   RETURN                  ;RETORNA
+                      00100 ;################################################## ATRASO 3 SEGUNDOS ##################################
+                            ###################################
+002E                  00101 ATRASO_3_SEG    
+002E   3003           00102     MOVLW       3
+002F   00A5           00103         MOVWF   CONTADOR3_SEG
+0030                  00104 ATRASO_3
+0030   2???           00105     CALL ATRASO             ;CHAMA A FUNÇÃO QUE FAZ 1 SEG
 Message[305]: Using default destination of 1 (file).
-0038   0BA2           00096         DECFSZ  CONTADOR3       
-0039   2???           00097         GOTO    ATRASO3
-Warning[203]: Found opcode in column 1. (RETURN)
-003A   0008           00098 RETURN
-                      00099 ;##########################################################
-003B                  00100 ATRASO4
+0031   0BA5           00106         DECFSZ  CONTADOR3_SEG   ;DECREMENTA O CONTADOR7_SEG
+0032   2???           00107     GOTO        ATRASO_3        ;SE CONTADOR != 0 CHAMA A PROPRIA FUNÇÃO 
+                      00108 
+0033   0008           00109     RETURN
+                      00110 ;################################################## ATRASO 4 SEGUNDOS ##################################
+                            ###################################
+0034                  00111 ATRASO_4_SEG    
+0034   3004           00112     MOVLW       4
+0035   00A6           00113         MOVWF   CONTADOR4_SEG
+0036                  00114 ATRASO_4
+0036   2???           00115     CALL ATRASO             ;CHAMA A FUNÇÃO QUE FAZ 1 SEG
 Message[305]: Using default destination of 1 (file).
-003B   0BA3           00101         DECFSZ  CONTADOR4       
-003C   2???           00102         GOTO    ATRASO4
-Warning[203]: Found opcode in column 1. (RETURN)
-003D   0008           00103 RETURN
-                      00104 ;##########################################################
-003E                  00105 S1RED_S2GREEN
-003E   1406           00106                 BSF S1RED
-003F   1086           00107                 BCF S1YELLOW
-0040   1106           00108                 BCF S1GREEN
-0041   1186           00109                 BCF S2RED
-0042   1206           00110                 BCF S2YELLOW
-0043   1686           00111                 BSF S2GREEN
-Warning[203]: Found opcode in column 1. (RETURN)
-0044   0008           00112 RETURN  
-                      00113 ;##########################################################
-0045                  00114 S1RED_S2YELLOW
-0045   1406           00115                 BSF S1RED
-0046   1086           00116                 BCF S1YELLOW
-0047   1106           00117                 BCF S1GREEN
-0048   1186           00118                 BCF S2RED
-0049   1606           00119                 BSF S2YELLOW
-004A   1286           00120                 BCF S2GREEN
-Warning[203]: Found opcode in column 1. (RETURN)
-004B   0008           00121 RETURN
-                      00122 ;##########################################################
-004C                  00123 S1GREEN_S2RED
-004C   1006           00124                 BCF S1RED
-004D   1086           00125                 BCF S1YELLOW
-004E   1506           00126                 BSF S1GREEN
-004F   1586           00127                 BSF S2RED
-0050   1206           00128                 BCF S2YELLOW
-0051   1286           00129                 BCF S2GREEN
-Warning[203]: Found opcode in column 1. (RETURN)
-0052   0008           00130 RETURN
-                      00131 ;##########################################################
-0053                  00132 S1YELLOW_S2RED
-0053   1006           00133                 BCF S1RED
-0054   1486           00134                 BSF S1YELLOW
-MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  4
+0037   0BA6           00116         DECFSZ  CONTADOR4_SEG   ;DECREMENTA O CONTADOR7_SEG
+0038   2???           00117     GOTO        ATRASO_4        ;SE CONTADOR != 0 CHAMA A PROPRIA FUNÇÃO 
+                      00118   
+0039   0008           00119     RETURN
+                      00120 ;################################################# ATRASO 7 SEGUNDOS ###################################
+                            ####################################
+003A                  00121 ATRASO_7_SEG    
+003A   3007           00122     MOVLW       7
+003B   00A7           00123         MOVWF   CONTADOR7_SEG
+003C                  00124 ATRASO_7
+003C   2???           00125     CALL ATRASO            ;CHAMA A FUNÇÃO QUE FAZ 1 SEG
+Message[305]: Using default destination of 1 (file).
+003D   0BA7           00126         DECFSZ  CONTADOR7_SEG   ;DECREMENTA O CONTADOR7_SEG
+003E   2???           00127     GOTO        ATRASO_7        ;SE CONTADOR != 0 CHAMA A PROPRIA FUNÇÃO 
+                      00128 
+003F   0008           00129     RETURN
+                      00130 ;#######################################################################################################
+                            #######################################
+0040                  00131 BOTAO_PRES
+0040   1D05           00132         BTFSS   BOTAO                                   ;O BOTÃO ESTÁ PRESSIONADO?
+0041   0008           00133         RETURN                                          ;NAO, ESPERA SER PRESSIONADO
+0042   2???           00134         GOTO    BOTAO_PRES1                             ;SIM, ENTÃO TRATA BOTÃO PRESSIONADO
+                      00135 
+0043                  00136 BOTAO_PRES1
+                      00137         ;BTFSC  BOTAO                           ;O BOTÃO AINDA ESTÁ PRESSIONADO?
+                      00138     ;GOTO       BOTAO_PRES1                     ;SIM, ENTÃO ESPERA DESLIGAR
+0043   1985           00139     BTFSC       VERIFICA                    ;O SINAL 1 ESTÁ VERMELHO?
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-20-2017  16:54:31         PAGE  4
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-0055   1106           00135                 BCF S1GREEN
-0056   1586           00136                 BSF S2RED
-0057   1206           00137                 BCF S2YELLOW
-0058   1286           00138                 BCF S2GREEN
-Warning[203]: Found opcode in column 1. (RETURN)
-0059   0008           00139 RETURN
-                      00140 ;##########################################################
-005A                  00141 CONTROLE_SEMAFORO
-                      00142         ;LOOP:
-                      00143         ;CALL S1RED_S2GREEN
-                      00144         ;       4 SEGUNDOS SEMPRE VERIFICANDO SE O BOTÃO FOI APERTADO
-                      00145         ;       SE O BOTAO FOI APERTADO, CHAMA O CICLO DE TRAVESSIA DE PEDESTRE 1 VEZ E DEPOIS RETORNA A
-                            O INICIO DO LOOP
-                      00146         ;CALL S1RED_S2YELLOW
-                      00147         ;       3 SEGUNDOS SEMPRE VERIFICANDO SE O BOTÃO FOI APERTADO
-                      00148         ;       SE O BOTAO FOI APERTADO, CHAMA O CICLO DE TRAVESSIA DE PEDESTRE 1 VEZ E DEPOIS RETORNA A
-                            O INICIO DO LOOP
-                      00149         ;CALL S1GREEN_S2RED
-                      00150         ;       4 SEGUNDOS SEMPRE VERIFICANDO SE O BOTÃO FOI APERTADO
-                      00151         ;       SE O BOTAO FOI APERTADO, CHAMA O CICLO DE TRAVESSIA DE PEDESTRE 1 VEZ E DEPOIS RETORNA A
-                            O INICIO DO LOOP
-                      00152         ;CALL S1YELLOW_S2RED
-                      00153         ;       3 SEGUNDOS SEMPRE VERIFICANDO SE O BOTÃO FOI APERTADO
-                      00154         ;       SE O BOTAO FOI APERTADO, CHAMA O CICLO DE TRAVESSIA DE PEDESTRE 1 VEZ E DEPOIS RETORNA A
-                            O INICIO DO LOOP
-                      00155         ;GOTO LOOP
-005A                  00156 FIM_CICLO
-Warning[203]: Found opcode in column 1. (RETURN)
-005A   0008           00157 RETURN
-                      00158 ;##########################################################
-005B                  00159 INICIO
-005B   0185           00160         CLRF    PORTA           ;LIMPA O PORTA
-005C   0186           00161         CLRF    PORTB           ;LIMPA O PORTB
-005D   1683           00162         BSF             STATUS, RP0
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-005E   0186           00163         CLRF    TRISB
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-005F   0185           00164         CLRF    TRISA
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0060   0185           00165         CLRF    TRISA
-0061   1283           00166         BCF             STATUS, RP0
-0062                  00167 REPETE
-0062   2???           00168         CALL    CONTROLE_SEMAFORO
-0063   2???           00169         GOTO    REPETE
+0044   2???           00140         GOTO    RETORNO_BOTAO_VERMELHO  ;SIM, REINICIA VERMELHO
+0045   2???           00141         GOTO    ESTADOS_MAQUINAS_2          ;NAO, COMECA AMARELO
+                      00142 ;#######################################################################################################
+                            ########################################
+                      00143 ;       FLUXO MAIOR(S1):
+                      00144 ;       7SEGS VERDE, 3SEGS AMARELO, 4SEGS VERMELHO
+                      00145 ;       FLUXO MENOR(S2):
+                      00146 ;       10SEGS VERMELHO, 2AMARELO, 2SEGS VERDE
+                      00147 
+                      00148 ; É PARA TER RETURN
+0046                  00149 ESTADOS_MAQUINAS
+                      00150                 
+0046   1585           00151         BSF VERIFICA
+                      00152         
+                      00153         ;#10SEG         S1: RED -> GREEN (7) -> YELLOW (3)      /       S2: YELLOW -> RED (10)
+0047   1006           00154                 BCF S1RED               ;APAGA
+0048   1206           00155                 BCF S2YELLOW    ;APAGA
+                      00156 
+0049   1506           00157                 BSF S1GREEN     ;7 SEG
+004A   1586           00158                 BSF S2RED
+004B   2???           00159                 CALL ATRASO_7_SEG
+                      00160 
+004C                  00161 RETORNO_DE_ESTADOS_2
+004C   1106           00162                 BCF S1GREEN     ;APAGA          
+004D   1486           00163                 BSF S1YELLOW    ;3 SEG
+004E   2???           00164                 CALL ATRASO_3_SEG
+                      00165 
+                      00166         ;#4SEG(2+2)             S1: YELLOW -> RED (4)   / S2 RED -> GREEN (2) -> YELLOW (2)
+004F   1086           00167         BCF S1YELLOW    ;APAGA
+0050   1186           00168                 BCF S2RED               ;APAGA
+                      00169                 
+0051   1185           00170         BCF VERIFICA
+0052   1406           00171                 BSF S1RED       ;4 SEG
+0053   1686           00172                 BSF     S2GREEN         ;2 SEG
+0054   2???           00173                 CALL ATRASO
+0055   2???           00174         CALL ATRASO
+                      00175                                 
+0056   1286           00176                 BCF S2GREEN     ;APAGA
+0057   1606           00177                 BSF S2YELLOW    ;2 SEG
+0058   2???           00178                 CALL ATRASO
+0059   2???           00179         CALL ATRASO
+                      00180         
+005A   0008           00181         RETURN
+                      00182 ;##########################################################
+                      00183 ;#######################################################################################################
+                            ########################################
+                      00184 ;       FLUXO MAIOR(S1):
+                      00185 ;       7 SEGS VERMELHO, 3 SEGS AMARELO, 4 SEGS VERDE
+                      00186 ;       FLUXO MENOR(S2):
+                      00187 ;       4 SEGS VERDE, 3 SEGS AMARELO, 7 SEGS VERMELHO
+                      00188 
+                      00189 ; NAO É PARA TER RETURN
+005B                  00190 ESTADOS_MAQUINAS_2
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-20-2017  16:54:31         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00191                 
+005B   1585           00192     BSF VERIFICA
+                      00193         
+                      00194         ;#7SEG          S1: GREEN -> YELLOW (3) -> RED (7)      /       S2: RED -> GREEN (4)
+005C   1106           00195                 BCF S1GREEN     ;APAGA
+                      00196 
+005D   1486           00197                 BSF S1YELLOW    ;3 SEG
+                      00198                 
+005E   2???           00199         CALL ATRASO_3_SEG
+                      00200 
+005F                  00201 RETORNO_BOTAO_VERMELHO
+005F   1186           00202                 BCF S2RED               ;APAGA
+0060   1086           00203                 BCF S1YELLOW    ;APAGA
+0061   1206           00204                 BCF S2YELLOW    
+0062   1185           00205                 BCF VERIFICA
+0063   1406           00206                 BSF S1RED               ;4+3 SEG
+0064   1686           00207         BSF S2GREEN             ;4 SEG
+                      00208                 
+0065   2???           00209                 CALL ATRASO_4_SEG
+                      00210 
+                      00211         ;#7SEG          S1: RED -> GREEN (4)    /       S2: GREEN -> YELLOW (3) -> RED (7)
+                      00212         
+0066   1286           00213         BCF S2GREEN             ;APAGA
+                      00214         
+0067   1606           00215         BSF S2YELLOW    ;3 SEG
+                      00216         
+0068   2???           00217         CALL ATRASO_3_SEG
+                      00218         
+0069   1206           00219         BCF S2YELLOW    ;APAGA
+006A   1585           00220                 BSF VERIFICA
+006B   1006           00221                 BCF S1RED               ;APAGA
+                      00222         
+006C   1586           00223         BSF S2RED               ;4 SEG
+006D   1506           00224         BSF S1GREEN             ;4 SEG
+                      00225 
+006E   2???           00226                 CALL ATRASO_4_SEG
+                      00227         
+006F   2???           00228    GOTO RETORNO_DE_ESTADOS_2
+                      00229 
+                      00230 ;##########################################################
 Warning[205]: Found directive in column 1. (END)
-3F10                  00170 END
-MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  5
+3F10                  00231 END
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-20-2017  16:54:31         PAGE  6
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
 ADEN                              00000003
-AJUSTE                            0000000B
-ATRASO                            00000018
-ATRASO1                           00000029
-ATRASO2                           0000002F
-ATRASO3                           00000035
-ATRASO4                           0000003B
+ATRASO                            00000013
+ATRASO1                           0000001A
+ATRASO2                           00000022
+ATRASO3                           00000029
+ATRASO_3                          00000030
+ATRASO_3_SEG                      0000002E
+ATRASO_4                          00000036
+ATRASO_4_SEG                      00000034
+ATRASO_7                          0000003C
+ATRASO_7_SEG                      0000003A
+BANK0                             BCF STATUS,RP0
+BANK1                             BSF STATUS,RP0
 BOTAO                             PORTA,2
+BOTAO_PRES                        00000040
+BOTAO_PRES1                       00000043
 BRGH                              00000002
 C                                 00000000
 C1INV                             00000004
@@ -258,6 +321,7 @@ CCP1X                             00000005
 CCP1Y                             00000004
 CCPR1H                            00000016
 CCPR1L                            00000015
+CICLO                             00000011
 CIS                               00000003
 CM0                               00000000
 CM1                               00000001
@@ -268,31 +332,34 @@ CMIF                              00000006
 CONTADOR1                         00000020
 CONTADOR2                         00000021
 CONTADOR3                         00000022
+CONTADOR3_SEG                     00000025
 CONTADOR4                         00000023
+CONTADOR4_SEG                     00000026
 CONTADOR5                         00000024
-CONTROLE_SEMAFORO                 0000005A
+CONTADOR7_SEG                     00000027
 CREN                              00000004
 CSRC                              00000007
 DC                                00000001
 EEADR                             0000009B
-EECON1                            0000009C
-EECON2                            0000009D
-EEDATA                            0000009A
-EEIE                              00000007
-EEIF                              00000007
-F                                 00000001
-FERR                              00000002
-FIM_CICLO                         0000005A
-FSR                               00000004
-GIE                               00000007
-INDF                              00000000
-MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  6
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-20-2017  16:54:31         PAGE  7
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-INICIO                            0000005B
+EECON1                            0000009C
+EECON2                            0000009D
+EEDATA                            0000009A
+EEIE                              00000007
+EEIF                              00000007
+ESTADOS_MAQUINAS                  00000046
+ESTADOS_MAQUINAS_2                0000005B
+F                                 00000001
+FERR                              00000002
+FSR                               00000004
+GIE                               00000007
+INDF                              00000000
+INICIO                            00000007
 INTCON                            0000000B
 INTE                              00000004
 INTEDG                            00000006
@@ -329,28 +396,25 @@ RCIF                              00000005
 RCREG                             0000001A
 RCSTA                             00000018
 RD                                00000000
-REPETE                            00000062
+RETORNO_BOTAO_VERMELHO            0000005F
+RETORNO_DE_ESTADOS_2              0000004C
 RP0                               00000005
 RP1                               00000006
-RX9                               00000006
-RX9D                              00000000
-S1GREEN                           PORTB,2
-S1GREEN_S2RED                     0000004C
-S1RED                             PORTB,0
-S1RED_S2GREEN                     0000003E
-S1RED_S2YELLOW                    00000045
-S1YELLOW                          PORTB,1
-S1YELLOW_S2RED                    00000053
-S2GREEN                           PORTB,5
-S2RED                             PORTB,3
-S2YELLOW                          PORTB,4
-SPBRG                             00000099
-MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  7
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-20-2017  16:54:31         PAGE  8
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
+RX9                               00000006
+RX9D                              00000000
+S1GREEN                           PORTB,2
+S1RED                             PORTB,0
+S1YELLOW                          PORTB,1
+S2GREEN                           PORTB,5
+S2RED                             PORTB,3
+S2YELLOW                          PORTB,4
+SPBRG                             00000099
 SPEN                              00000007
 SREN                              00000005
 STATUS                            00000003
@@ -391,9 +455,16 @@ TXIE                              00000004
 TXIF                              00000004
 TXREG                             00000019
 TXSTA                             00000098
+VERIFICA                          PORTA,3
 VR0                               00000000
 VR1                               00000001
 VR2                               00000002
+MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-20-2017  16:54:31         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
 VR3                               00000003
 VRCON                             0000009F
 VREN                              00000007
@@ -404,12 +475,6 @@ WR                                00000001
 WREN                              00000002
 WRERR                             00000003
 Z                                 00000002
-MPASM  5.35            TRABALHO_INTEGRADO.ASM   11-19-2017  10:17:42         PAGE  8
-
-
-SYMBOL TABLE
-  LABEL                             VALUE 
-
 _BODEN_OFF                        00003FBF
 _BODEN_ON                         00003FFF
 _BOREN_OFF                        00003FBF
@@ -442,7 +507,7 @@ __16F628A                         00000001
 __DEBUG                           1
 
 Errors   :     0
-Warnings :    13 reported,     0 suppressed
-Messages :     9 reported,     0 suppressed
+Warnings :     3 reported,     0 suppressed
+Messages :     8 reported,     0 suppressed
 
 
